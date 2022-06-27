@@ -54,6 +54,23 @@ $app->get('/new-stories',function(Request $request) use ($app){
 })->bind('new_stories');
 
 /**
+ * @Route ("/job-stories")
+ * @method : GET
+ * @optional:
+ *  { page:int}
+ * */
+$app->get('/job-stories',function(Request $request) use ($app){
+
+    $page = $request->get('page',1);
+    $stories = $app[NewsStoriesService::class]->jobStories($page);
+    return $app['twig']->render(
+        'news_stories/job_stories.html.twig',
+        compact('stories','page')
+    );
+
+})->bind('job_stories');
+
+/**
  * @Route ("/item/{id}")
  * @method : GET
  * @optional:

@@ -34,6 +34,28 @@ class NewsStoriesService extends BaseHackerNewsService
         return $this->fetchNewsStoriesDetailFromIds($ids);
     }
 
+     /**
+     * Get a collection of top news stories,
+     * pagination supported.
+     *
+     * @param int $page current page number
+     * @return Collection
+     * @throws \FGhazaleh\Exceptions\HttpClientException
+     * @throws InvalidArgsException
+     */
+    public function jobStories(int $page = 1):Collection
+    {
+        /*
+         * @todo list: should be cached for 10 min.
+         */
+        $ids = $this->fetchJobStoriesIds()
+            ->slice(
+                $this->getPageOffset($page),
+                $this->getPerPage()
+            );
+        return $this->fetchNewsStoriesDetailFromIds($ids);
+    }
+
     /**
      * Get a collection of top news stories,
      * pagination supported.
@@ -56,6 +78,8 @@ class NewsStoriesService extends BaseHackerNewsService
         return $this->fetchNewsStoriesDetailFromIds($ids);
     }
 
+
+    
     /**
      * Get news stories detail based on stories ids.
      *
@@ -135,6 +159,28 @@ class NewsStoriesService extends BaseHackerNewsService
         }
         // get the top_stories url from config.
         $url = $this->config['urls']['new_stories'];
+        // fetch the data from server.
+        $response = $this->httpClient->get($url);
+        if (!$response->ok()) {
+            throw new InvalidArgsException(sprintf("Something went wrong, unable to fetch data from url [%d]", $url));
+        }
+        // create a collection from result.
+        return Collection::make($response->getResponse());
+    }
+
+     /**
+     * Fetch JobStories Ids from API.
+     *
+     * @return Collection
+     * @throws InvalidArgsException
+     */
+    private function fetchJobStoriesIds():Collection
+    {
+        if (!isset($this->config['urls']['job_stories'])) {
+            throw new InvalidArgsException('"job_stories" key is missing in config file.');
+        }
+        // get the job_stories url from config.
+        $url = $this->config['urls']['job_stories'];
         // fetch the data from server.
         $response = $this->httpClient->get($url);
         if (!$response->ok()) {
